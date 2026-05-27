@@ -1,0 +1,4 @@
+Adafruit CircuitPython 10.2.1 on 2026-05-13; Adafruit MagTag with ESP32S2
+Board ID:adafruit_magtag_2.9_grayscale
+UID:C7FD1A542389
+MAC:7C:DF:A1:45:32:98
