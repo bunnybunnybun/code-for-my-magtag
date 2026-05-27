@@ -1,9 +1,21 @@
-import time
-import adafruit_datetime
+import asyncio
+import time as og_time
 
+from adafruit_datetime import date, datetime, time
 from adafruit_magtag.magtag import MagTag
 
 magtag = MagTag()
+nametag_or_clock = False
+
+
+async def clock():
+    while not nametag_or_clock:
+        now = datetime.now()
+        print(now)
+        magtag.set_text(f"{now.year}-{now.month}-{now.day}", 0)
+        magtag.set_text(f"{now.hour}:{now.minute}", 1)
+        await asyncio.sleep(10)
+
 
 def nametag():
     magtag.remove_all_text()
@@ -12,7 +24,7 @@ def nametag():
             5,
             20,
         ),
-        text_scale = 2
+        text_scale=2,
     )
 
     magtag.add_text(
@@ -20,42 +32,70 @@ def nametag():
             5,
             72,
         ),
-        text_scale = 6,
+        text_scale=6,
     )
 
     magtag.set_text("Hello, my name is:", 0)
     magtag.set_text("Carlisle", 1)
 
-def clock():
+
+async def start_clock():
     magtag.remove_all_text()
     magtag.add_text(
         text_position=(
-            5,
-            72,
+            10,
+            20,
         ),
-        text_scale = 6,
+        text_scale=3,
     )
 
-    magtag.set_text("clock", 0)
+    magtag.add_text(
+        text_position=(
+            10,
+            80,
+        ),
+        text_scale=9,
+    )
 
-clock()
+    magtag.network.connect()
+    magtag.get_local_time()
 
-nametag_or_clock = False
-while True:
-    if not magtag.peripherals.buttons[0].value:
-        print("Button a pressed")
-        magtag.peripherals.neopixel_disable = False
-        magtag.peripherals.neopixels.fill((240, 0, 255))
-        magtag.peripherals.play_tone(1318, 0.3)
-    elif not magtag.peripherals.buttons[1].value:
-        print("Button b pressed")
-        magtag.peripherals.neopixel_disable = True
-        magtag.peripherals.play_tone(900, 0.3)
-    elif not magtag.peripherals.buttons[2].value:
-        print("Button c pressed")
-        if nametag_or_clock:
-            nametag_or_clock = not nametag_or_clock
-            nametag()
-        else:
-            nametag_or_clock = not nametag_or_clock
-            clock()
+    clock_task = asyncio.create_task(clock())
+    await asyncio.gather(clock_task)
+
+
+magtag.peripherals.neopixel_disable = True
+
+
+async def listen_for_button_presses():
+    global nametag_or_clock
+    while True:
+        if not magtag.peripherals.buttons[0].value:
+            print("Button a pressed")
+            if not magtag.peripherals.neopixel_disable:
+                magtag.peripherals.neopixel_disable = True
+                await asyncio.sleep(0.5)
+            else:
+                magtag.peripherals.neopixel_disable = False
+                magtag.peripherals.neopixels.fill((240, 0, 255))
+                await asyncio.sleep(0.5)
+
+        elif not magtag.peripherals.buttons[2].value:
+            print("Button c pressed")
+            if nametag_or_clock:
+                nametag_or_clock = not nametag_or_clock
+                asyncio.run(start_clock())
+            else:
+                nametag_or_clock = not nametag_or_clock
+                nametag()
+
+        await asyncio.sleep(0.05)
+
+
+async def main():
+    start_clock_task = asyncio.create_task(start_clock())
+    listen_for_button_presses_task = asyncio.create_task(listen_for_button_presses())
+    await asyncio.gather(start_clock_task, listen_for_button_presses_task)
+
+
+asyncio.run(main())
