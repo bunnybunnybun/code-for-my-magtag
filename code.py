@@ -13,8 +13,11 @@ async def clock():
         now = datetime.now()
         print(now)
         magtag.set_text(f"{now.year}-{now.month}-{now.day}", 0)
-        magtag.set_text(f"{now.hour}:{now.minute}", 1)
-        await asyncio.sleep(10)
+        if now.minute < 10:
+            magtag.set_text(f"{now.hour}:0{now.minute}", 1)
+        else:
+            magtag.set_text(f"{now.hour}:{now.minute}", 1)
+        await asyncio.sleep(300)
 
 
 def nametag():
@@ -57,8 +60,11 @@ async def start_clock():
         text_scale=9,
     )
 
-    magtag.network.connect()
-    magtag.get_local_time()
+    try:
+        magtag.network.connect()
+        magtag.get_local_time()
+    except Exception as error:
+        print(error)
 
     clock_task = asyncio.create_task(clock())
     await asyncio.gather(clock_task)
@@ -88,6 +94,9 @@ async def listen_for_button_presses():
             else:
                 nametag_or_clock = not nametag_or_clock
                 nametag()
+        elif not magtag.peripherals.buttons[3].value:
+            print("Button d pressed")
+            magtag.refresh()
 
         await asyncio.sleep(0.05)
 
