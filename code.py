@@ -6,18 +6,22 @@ from adafruit_magtag.magtag import MagTag
 
 magtag = MagTag()
 nametag_or_clock = False
+day = 0
 
 
 async def clock():
+    global day
     while not nametag_or_clock:
         now = datetime.now()
         print(now)
-        magtag.set_text(f"{now.year}-{now.month}-{now.day}", 0)
+        if day != now.day:
+            magtag.set_text(f"{now.year}-{now.month}-{now.day}", 0)
         if now.minute < 10:
             magtag.set_text(f"{now.hour}:0{now.minute}", 1)
         else:
             magtag.set_text(f"{now.hour}:{now.minute}", 1)
         await asyncio.sleep(300)
+        day = now.day
 
 
 def nametag():
