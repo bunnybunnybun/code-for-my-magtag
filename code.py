@@ -18,16 +18,18 @@ requests = adafruit_requests.Session(pool, ssl_context)
 
 async def clock():
     global day
-    now = datetime.now()
-    print(now)
-    if day != now.day:
-        magtag.set_text(f"{now.year}-{now.month}-{now.day}", 0)
-    if now.minute < 10:
-        magtag.set_text(f"{now.hour}:0{now.minute}", 1)
-    else:
-        magtag.set_text(f"{now.hour}:{now.minute}", 1)
-    await asyncio.sleep(300)
-    day = now.day
+    while True:
+        now = datetime.now()
+        print(now)
+        if day != now.day:
+            magtag.set_text(f"{now.year}-{now.month}-{now.day}", 0, auto_refresh=False)
+        if now.minute < 10:
+            magtag.set_text(f"{now.hour}:0{now.minute}", 1, auto_refresh=False)
+        else:
+            magtag.set_text(f"{now.hour}:{now.minute}", 1, auto_refresh=False)
+        magtag.refresh()
+        await asyncio.sleep(300)
+        day = now.day
 
 async def start_clock():
     magtag.remove_all_text()
@@ -71,8 +73,9 @@ async def nametag():
         text_scale=6,
     )
 
-    magtag.set_text("Hello, my name is:", 0)
-    magtag.set_text("Carlisle", 1)
+    magtag.set_text("Hello, my name is:", 0, auto_refresh=False)
+    magtag.set_text("Carlisle", 1, auto_refresh=False)
+    magtag.refresh()
 
 async def weather():
     ssid = os.getenv("CIRCUITPY_WIFI_SSID")
@@ -132,10 +135,11 @@ async def weather():
         ),
         text_scale=2,
     )
-    magtag.set_text(f"{current_temp}{temperature_unit}", 0)
-    magtag.set_text(f"Feels like {current_apparent_temp}{temperature_unit}", 1)
-    magtag.set_text(f"Max: {today_max_temp}",2)
-    magtag.set_text(f"Min: {today_min_temp}",3)
+    magtag.set_text(f"{current_temp}{temperature_unit}", 0, auto_refresh=False)
+    magtag.set_text(f"Feels like {current_apparent_temp}{temperature_unit}", 1, auto_refresh=False)
+    magtag.set_text(f"Max:{today_max_temp}",2, auto_refresh=False)
+    magtag.set_text(f"Min:{today_min_temp}",3, auto_refresh=False)
+    magtag.refresh()
 
 magtag.peripherals.neopixel_disable = True
 
