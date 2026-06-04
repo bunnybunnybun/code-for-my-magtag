@@ -103,14 +103,16 @@ async def weather():
         current_apparent_temp = weather_response["current"]["apparent_temperature"]
         today_max_temp = weather_response["daily"]["temperature_2m_max"][0]
         today_min_temp = weather_response["daily"]["temperature_2m_min"][0]
+        tomorrow_max_temp = weather_response["daily"]["temperature_2m_max"][1]
+        tomorrow_min_temp = weather_response["daily"]["temperature_2m_min"][1]
     except (KeyError, TypeError):
         print("Something went wrong :(")
     print(f"Response: {weather_response}")
     magtag.remove_all_text()
     magtag.add_text(
         text_position=(
-            15,
-            35,
+            10,
+            30,
         ),
         text_scale=5,
     )
@@ -123,22 +125,39 @@ async def weather():
     )
     magtag.add_text(
         text_position=(
-            210,
+            215,
             20,
         ),
         text_scale=2,
     )
     magtag.add_text(
         text_position=(
-            210,
+            215,
             50,
         ),
         text_scale=2,
     )
+    magtag.add_text(
+        text_position=(
+            0,
+            90,
+        ),
+        text_scale=1,
+    )
+    magtag.add_text(
+        text_position=(
+            10,
+            110,
+        ),
+        text_scale=2,
+    )
+
     magtag.set_text(f"{current_temp}{temperature_unit}", 0, auto_refresh=False)
     magtag.set_text(f"Feels like {current_apparent_temp}{temperature_unit}", 1, auto_refresh=False)
-    magtag.set_text(f"Max:{today_max_temp}",2, auto_refresh=False)
-    magtag.set_text(f"Min:{today_min_temp}",3, auto_refresh=False)
+    magtag.set_text(f"max:{int(today_max_temp)}", 2, auto_refresh=False)
+    magtag.set_text(f"min:{int(today_min_temp)}", 3, auto_refresh=False)
+    magtag.set_text("---------------------TOMORROW---------------------", 4, auto_refresh=False)
+    magtag.set_text(f"max: {int(tomorrow_max_temp)} | min: {int(tomorrow_min_temp)}", 5)
     magtag.refresh()
 
 magtag.peripherals.neopixel_disable = True
