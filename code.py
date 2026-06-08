@@ -16,6 +16,50 @@ pool = adafruit_connection_manager.get_radio_socketpool(wifi.radio)
 ssl_context = adafruit_connection_manager.get_radio_ssl_context(wifi.radio)
 requests = adafruit_requests.Session(pool, ssl_context)
 
+async def home():
+    magtag.remove_all_text()
+    magtag.add_text(
+        text_position=(
+            45,
+            50,
+        ),
+        text_scale=5
+    )
+    magtag.add_text(
+        text_position=(
+            10,
+            110,
+        ),
+        text_scale=1
+    )
+    magtag.add_text(
+        text_position=(
+            75,
+            110,
+        ),
+        text_scale=1
+    )
+    magtag.add_text(
+        text_position=(
+            155,
+            110,
+        ),
+        text_scale=1
+    )
+    magtag.add_text(
+        text_position=(
+            225,
+            110,
+        ),
+        text_scale=1
+    )
+    magtag.set_text("Welcome", 0, auto_refresh=False)
+    magtag.set_text("Front\nlight", 1, auto_refresh=False)
+    magtag.set_text("Weather", 2, auto_refresh=False)
+    magtag.set_text("Clock", 3, auto_refresh=False)
+    magtag.set_text("Nametag", 4, auto_refresh=False)
+    magtag.refresh()
+
 async def clock():
     global day
     while True:
@@ -52,8 +96,17 @@ async def start_clock():
     try:
         magtag.network.connect()
         magtag.get_local_time()
-    except Exception as error:
-        print(error)
+    except Exception as e:
+        magtag.remove_all_text()
+        magtag.add_text(
+            text_position=(
+                10,
+                30,
+            ),
+            text_scale=1,
+        )
+        magtag.set_text(f"Could not connect to wifi.\nError: {e}", 0)
+        print(f"❌ OSError: {e}")
 
 async def nametag():
     magtag.remove_all_text()
@@ -83,6 +136,7 @@ async def weather():
     try:
         wifi.radio.connect(ssid, password)
     except OSError as e:
+        magtag.remove_all_text()
         magtag.add_text(
             text_position=(
                 10,
@@ -206,9 +260,9 @@ async def listen_for_button_presses():
 
 
 async def main():
-    weather_task = asyncio.create_task(weather())
+    home_task = asyncio.create_task(home())
     listen_for_button_presses_task = asyncio.create_task(listen_for_button_presses())
-    await asyncio.gather(weather_task, listen_for_button_presses_task)
+    await asyncio.gather(listen_for_button_presses_task)
 
 
 asyncio.run(main())
