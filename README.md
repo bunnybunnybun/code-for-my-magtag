@@ -19,3 +19,6 @@ Wow here's a demo video: https://cdn.hackclub.com/019ea9a1-7346-712b-b106-acc955
 
 # Installation
 [Install CircuitPython](https://learn.adafruit.com/adafruit-magtag/circuitpython) onto your MagTag, then copy the code.py file from this repository onto the MagTag. Bam that's it. Easy peasy.
+
+# AI usage
+I used AI a little itty bitty bit to help figure out how to use the Asyncio library and troubleshoot a few errors, but if I remember right it didn't write any of the code.
